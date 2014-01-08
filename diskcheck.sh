@@ -21,8 +21,8 @@ function checkdeps {
     fi
 }
 
-function thetime {
-    date +%c
+function log {
+    echo "[$(date +%c)] $@"
 }
 
 function smartcheck {
@@ -30,7 +30,7 @@ function smartcheck {
     shift
     for disk in $@; do
 	local basename=$(basename $disk)
-	echo "Running SMART #${check_no} of ${basename} on $(thetime)"
+	log "Running SMART check #${check_no} on ${basename}"
 	smartctl -d sat --all $disk > ${basename}.smart.${check_no}
     done
 }
@@ -39,9 +39,9 @@ function bbcheck {
     local mode=$1
     shift
     test $mode = "rw" && local opt="-w" || local opt=""
-    echo "Running badblocks with mode ${mode} for all disks on $(thetime)"
     for disk in $@; do
 	local basename=$(basename $disk)
+        log "Checking $basename for bad blocks ($mode mode)"
 	badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
     done
     wait
@@ -50,7 +50,7 @@ function bbcheck {
 function zcavcheck {
     for disk in $@; do
 	local basename=$(basename $disk)
-	echo "Running zcav for disk ${basename} on $(thetime)"
+	log "Running zcav on ${basename}"
 	zcav -l ${basename}.zcav ${disk}
     done
 }
@@ -77,8 +77,7 @@ BASEDIR="diskcheck-$(date +%FT%T)"
 mkdir $BASEDIR; pushd $BASEDIR
 
 {
-echo "Starting diskceck on $(thetime)"
-echo "Disks checked are $@"
+log "Starting diskcheck on $@"
 smartcheck 1 "$@"
 bbcheck ro "$@"
 smartcheck 2 "$@"
@@ -87,7 +86,7 @@ smartcheck 3 "$@"
 zcavcheck "$@"
 smartcheck 4 "$@"
 draw_zcav "$@"
-echo "Finished diskceck on $(thetime)"
+log "Finished diskcheck"
 } &> diskcheck.log
 
 popd
