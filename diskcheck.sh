@@ -56,21 +56,23 @@ function zcavcheck {
 }
 
 function draw_zcav {
-    # TODO: save .gp file if gnuplot is not installed
-    which gnuplot &> /dev/null || return 0
     for disk in $@; do
         local basename=$(basename $disk)
-        echo "unset autoscale x
+        local plotfile="${basename}.zcav.gp"
+        cat <<EOF > $plotfile
+unset autoscale x
 set autoscale xmax
 set autoscale xmin
 unset autoscale y
 set autoscale ymax
 set autoscale ymin
-set xlabel \"Position MB\"
-set ylabel \"MB/s\"
+set xlabel "position (MB)"
+set ylabel "transfer rate (MB/s)"
 set terminal png
-set output \"${basename}.zcav.png\"
-plot \"${basename}.zcav\" with dots" | gnuplot
+set output "${basename}.zcav.png"
+plot "${basename}.zcav" with dots
+EOF
+        which gnuplot &> /dev/null && gnuplot $plotfile
     done
 }
 
