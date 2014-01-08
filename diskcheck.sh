@@ -10,9 +10,10 @@ DATE=$(date +%FT%R)
 mkdir $DATE; cd $DATE
 
 for prog in badblocks smartctl zcav pgrep gnuplot
-do 
+do
     which $prog > /dev/null || echo "${prog} is not installed\!"
 done
+
 function thetime {
     date +%c
 }
@@ -42,24 +43,18 @@ function bbcheck {
 }
 
 function zcavcheck {
-    local mode=$1
-    shift
-    test $mode = "rw" && local opt="-w" || local opt=""
     for disk in $@
     do
 	local basename=$(basename $disk)
-	echo "Running zcav with mode ${mode} of disk ${basename} on $(thetime)"
-	zcav ${opt} -l ${basename}.zcav.${mode} ${disk}
+	echo "Running zcav for disk ${basename} on $(thetime)"
+	zcav -l ${basename}.zcav ${disk}
     done
 }
 
 function draw_zcav {
-    for mode in ro rw;
-    do
-	for disk in $@;
-	do
-	    local basename=$(basename $disk)
-            echo "unset autoscale x
+    for disk in $@; do
+	local basename=$(basename $disk)
+	echo "unset autoscale x
 set autoscale xmax
 set autoscale xmin
 unset autoscale y
@@ -68,9 +63,8 @@ set autoscale ymin
 set xlabel \"Position MB\"
 set ylabel \"MB/s\"
 set terminal png
-set output \"${basename}.zcav.${mode}.png\"
-plot \"${basename}.zcav.${mode}\" with dots" | gnuplot
-	done
+set output \"${basename}.zcav.png\"
+plot \"${basename}.zcav\" with dots" | gnuplot
     done
 }
 
@@ -82,10 +76,8 @@ bbcheck ro "$@"
 smartcheck 2 "$@"
 bbcheck rw "$@"
 smartcheck 3 "$@"
-zcavcheck ro "$@"
+zcavcheck "$@"
 smartcheck 4 "$@"
-zcavcheck rw "$@"
-smartcheck 5 "$@"
 draw_zcav "$@"
 echo "Finished diskceck on $(thetime)"
 } &> diskcheck.log
