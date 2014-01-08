@@ -6,13 +6,21 @@ then
     exit 1
 fi
 
-DATE=$(date +%FT%R)
-mkdir $DATE; cd $DATE
-
-for prog in badblocks smartctl zcav pgrep gnuplot
-do
-    which $prog > /dev/null || echo "${prog} is not installed\!"
-done
+function checkdeps {
+    local deps_unmet=false
+    for dep in badblocks smartctl zcav pgrep gnuplot
+    do
+        if ! which $prog &> /dev/null; then
+            echo "${dep} is not installed"
+            deps_unmet=true
+        fi
+    done
+    if $deps_unmet
+    then
+        echo -e "\nUnmet dependencies, exiting..."
+        exit 1
+    fi
+}
 
 function thetime {
     date +%c
@@ -67,6 +75,10 @@ set output \"${basename}.zcav.png\"
 plot \"${basename}.zcav\" with dots" | gnuplot
     done
 }
+
+checkdeps
+DATE=$(date +%FT%R)
+mkdir $DATE; cd $DATE
 
 {
 echo "Starting diskceck on $(thetime)"
