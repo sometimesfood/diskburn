@@ -7,7 +7,7 @@ fi
 
 function checkdeps {
     local deps_unmet=false
-    for dep in badblocks smartctl zcav pgrep gnuplot; do
+    for dep in badblocks smartctl zcav gnuplot; do
         if ! which $prog &> /dev/null; then
             echo "${dep} is not installed"
             deps_unmet=true
@@ -42,7 +42,7 @@ function bbcheck {
 	local basename=$(basename $disk)
 	badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
     done
-    while pgrep 'badblocks' > /dev/null;do sleep 60;done
+    wait
 }
 
 function zcavcheck {
