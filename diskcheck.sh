@@ -9,7 +9,7 @@ fi
 
 function checkdeps {
     local deps_unmet=false
-    for dep in badblocks smartctl zcav gnuplot; do
+    for dep in badblocks smartctl zcav; do
         if ! which $prog &> /dev/null; then
             echo "${dep} is not installed"
             deps_unmet=true
@@ -56,6 +56,8 @@ function zcavcheck {
 }
 
 function draw_zcav {
+    # TODO: save .gp file if gnuplot is not installed
+    which gnuplot &> /dev/null || return 0
     for disk in $@; do
         local basename=$(basename $disk)
         echo "unset autoscale x
