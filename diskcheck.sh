@@ -3,7 +3,7 @@
 set -e
 
 if [ $# -eq 0 ]; then
-    echo "Usage: diskcheck.sh DEVICE..."
+    echo 'Usage: diskcheck.sh DEVICE...' >&2
     exit 1
 fi
 
@@ -11,12 +11,12 @@ function checkdeps {
     local deps_unmet=false
     for dep in badblocks smartctl zcav; do
         if ! which $prog &> /dev/null; then
-            echo "${dep} is not installed"
+            echo "${dep} is not installed" >&2
             deps_unmet=true
         fi
     done
     if $deps_unmet; then
-        echo -e "\nUnmet dependencies, exiting..."
+        echo -e "\nUnmet dependencies, exiting..." >&2
         exit 1
     fi
 }
