@@ -1,22 +1,19 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]
-then
+if [ $# -eq 0 ]; then
     echo "Usage: diskcheck.sh DEVICE..."
     exit 1
 fi
 
 function checkdeps {
     local deps_unmet=false
-    for dep in badblocks smartctl zcav pgrep gnuplot
-    do
+    for dep in badblocks smartctl zcav pgrep gnuplot; do
         if ! which $prog &> /dev/null; then
             echo "${dep} is not installed"
             deps_unmet=true
         fi
     done
-    if $deps_unmet
-    then
+    if $deps_unmet; then
         echo -e "\nUnmet dependencies, exiting..."
         exit 1
     fi
@@ -29,8 +26,7 @@ function thetime {
 function smartcheck {
     local check_no=$1
     shift
-    for disk in $@
-    do
+    for disk in $@; do
 	local basename=$(basename $disk)
 	echo "Running SMART #${check_no} of ${basename} on $(thetime)"
 	smartctl -d sat --all $disk > ${basename}.smart.${check_no}
@@ -42,8 +38,7 @@ function bbcheck {
     shift
     test $mode = "rw" && local opt="-w" || local opt=""
     echo "Running badblocks with mode ${mode} for all disks on $(thetime)"
-    for disk in $@
-    do
+    for disk in $@; do
 	local basename=$(basename $disk)
 	badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
     done
@@ -51,8 +46,7 @@ function bbcheck {
 }
 
 function zcavcheck {
-    for disk in $@
-    do
+    for disk in $@; do
 	local basename=$(basename $disk)
 	echo "Running zcav for disk ${basename} on $(thetime)"
 	zcav -l ${basename}.zcav ${disk}
