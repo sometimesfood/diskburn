@@ -71,7 +71,7 @@ plot \"${basename}.zcav\" with dots" | gnuplot
 }
 
 checkdeps
-DATE=$(date +%FT%R)
+DATE=$(date +%FT%T)
 mkdir $DATE; cd $DATE
 
 {
