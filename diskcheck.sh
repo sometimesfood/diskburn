@@ -73,10 +73,9 @@ plot \"${basename}.zcav\" with dots" | gnuplot
 }
 
 checkdeps
-BASEDIR="diskcheck-$(date +%FT%T)"
-mkdir $BASEDIR; pushd $BASEDIR
 
-{
+BASEDIR="diskcheck-$(date +%FT%T)"; mkdir $BASEDIR
+pushd $BASEDIR
 log "Starting diskcheck on $@"
 smartcheck 1 "$@"
 bbcheck ro "$@"
@@ -87,6 +86,4 @@ zcavcheck "$@"
 smartcheck 4 "$@"
 draw_zcav "$@"
 log "Finished diskcheck"
-} &> diskcheck.log
-
 popd
