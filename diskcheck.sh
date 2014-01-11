@@ -56,10 +56,7 @@ function zcavcheck {
 }
 
 function draw_zcav {
-    for disk in $@; do
-        local basename=$(basename $disk)
-        local plotfile="${basename}.zcav.gp"
-        cat <<EOF > $plotfile
+    cat <<EOF > gnuplot.gp
 unset autoscale x
 set autoscale xmax
 set autoscale xmin
@@ -68,11 +65,18 @@ set autoscale ymax
 set autoscale ymin
 set xlabel "position (MB)"
 set ylabel "transfer rate (MB/s)"
-set terminal png
-set output "${basename}.zcav.png"
-plot "${basename}.zcav" with dots
+set terminal png size 2560,960
+set output disk.".zcav.png"
+set multiplot layout 1,2 title disk
+set title "ro"
+plot disk.".zcav.ro" pt 1 ps 1
+set title "rw"
+plot disk.".zcav.rw" pt 1 ps 1
+unset multiplot
 EOF
-        which gnuplot &> /dev/null && gnuplot $plotfile
+    for disk in $@; do
+        local basename=$(basename $disk)
+        which gnuplot &> /dev/null && gnuplot -e "disk='${basename}'" gnuplot.gp
     done
 }
 
