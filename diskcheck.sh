@@ -28,11 +28,17 @@ function log {
 function smartcheck {
     local check_no=$1
     shift
+    set +e
     for disk in $@; do
         local basename=$(basename $disk)
         log "Running SMART check #${check_no} on ${basename}"
         smartctl -d sat --all $disk > ${basename}.smart.${check_no}
+        smartstat=$?
+        if [ $(($smartstat & 191)) -ne 0 ]; then
+            exit $smartstat
+        fi
     done
+    set -e
 }
 
 function bbcheck {
