@@ -31,7 +31,7 @@ function smartcheck {
     set +e
     for disk in $@; do
         local basename=$(basename $disk)
-        log "Running SMART check #${check_no} on ${basename}"
+        log "Running SMART check #${check_no} on ${disk}"
         smartctl -d sat --all $disk > ${basename}.smart.${check_no}
         smartstat=$?
         if [ $(($smartstat & 191)) -ne 0 ]; then
@@ -47,7 +47,7 @@ function bbcheck {
     test $mode = "rw" && local opt="-w" || local opt=""
     for disk in $@; do
         local basename=$(basename $disk)
-        log "Checking $basename for bad blocks ($mode mode)"
+        log "Checking $disk for bad blocks ($mode mode)"
         badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
     done
     wait
@@ -56,7 +56,7 @@ function bbcheck {
 function zcavcheck {
     for disk in $@; do
         local basename=$(basename $disk)
-        log "Running zcav on ${basename}"
+        log "Running zcav on ${disk}"
         zcav -l ${basename}.zcav ${disk}
     done
 }
