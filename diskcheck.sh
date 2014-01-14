@@ -1,6 +1,19 @@
 #!/bin/bash
 
-set -e
+checkperms() {
+    for disk in $@; do
+        if ! [[ -e ${disk} ]]; then
+            err "diskcheck.sh: ${disk}: No such file or directory"
+            exit 1
+        elif ! [[ -b ${disk} ]]; then
+            err "diskcheck.sh: ${disk} is not a block device"
+            exit 1
+        elif ! [[ -r ${disk} && -w ${disk} ]]; then
+            err "diskcheck.sh: ${disk}: Permission denied"
+            exit 1
+        fi
+    done
+}
 
 checkusage() {
     if [[ $# -eq 0 ]]; then
@@ -30,17 +43,11 @@ err() { echo -e "$@" >&2; }
 smartcheck() {
     local check_no=$1
     shift
-    set +e
     for disk in $@; do
         local basename=$(basename $disk)
         log "Running SMART check #${check_no} on ${disk}"
         smartctl -d sat --all $disk > ${basename}.smart.${check_no}
-        smartstat=$?
-        if [[ $(($smartstat & 191)) -ne 0 ]]; then
-            exit $smartstat
-        fi
     done
-    set -e
 }
 
 bbcheck() {
@@ -90,6 +97,7 @@ EOF
 
 checkusage "$@"
 checkdeps
+checkperms "$@"
 
 BASEDIR="diskcheck-$(date +%FT%T)"; mkdir $BASEDIR
 pushd $BASEDIR
