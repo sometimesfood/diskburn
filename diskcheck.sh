@@ -16,12 +16,12 @@ checkperms() {
 checkdeps() {
     local deps_unmet=false
     for dep in badblocks smartctl zcav; do
-        if ! hash $dep >/dev/null 2>&1; then
+        if ! hash ${dep} >/dev/null 2>&1; then
             err "${dep} is not installed"
             deps_unmet=true
         fi
     done
-    $deps_unmet && err_exit "\nUnmet dependencies, exiting..."
+    ${deps_unmet} && err_exit "\nUnmet dependencies, exiting..."
 }
 
 log() { echo -e "[$(date +%c)] $@"; }
@@ -37,19 +37,19 @@ smartcheck() {
     local check_no=$1
     shift
     for disk in $@; do
-        local basename=$(basename $disk)
+        local basename=$(basename ${disk})
         log "Running SMART check #${check_no} on ${disk}"
-        smartctl -d sat --all $disk > ${basename}.smart.${check_no}
+        smartctl -d sat --all ${disk} > ${basename}.smart.${check_no}
     done
 }
 
 bbcheck() {
     local mode=$1
     shift
-    test $mode = "rw" && local opt="-w" || local opt=""
+    [[ ${mode} = "rw" ]] && local opt="-w" || local opt=""
     for disk in $@; do
-        local basename=$(basename $disk)
-        log "Checking $disk for bad blocks ($mode mode)"
+        local basename=$(basename ${disk})
+        log "Checking ${disk} for bad blocks (${mode} mode)"
         badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
     done
     wait
@@ -57,7 +57,7 @@ bbcheck() {
 
 zcavcheck() {
     for disk in $@; do
-        local basename=$(basename $disk)
+        local basename=$(basename ${disk})
         log "Running zcav on ${disk}"
         zcav -l ${basename}.zcav ${disk}
     done
@@ -83,7 +83,7 @@ plot disk.".zcav.rw" pt 1 ps 1
 unset multiplot
 EOF
     for disk in $@; do
-        local basename=$(basename $disk)
+        local basename=$(basename ${disk})
         which gnuplot &> /dev/null && gnuplot -e "disk='${basename}'" gnuplot.gp
     done
 }
@@ -92,8 +92,8 @@ checkusage "$@"
 checkperms "$@"
 checkdeps
 
-BASEDIR="diskcheck-$(date +%FT%T)"; mkdir $BASEDIR
-pushd $BASEDIR
+BASEDIR="diskcheck-$(date +%FT%T)"; mkdir ${BASEDIR}
+pushd ${BASEDIR}
 log "Starting diskcheck on $@"
 smartcheck 1 "$@"
 bbcheck ro "$@"
