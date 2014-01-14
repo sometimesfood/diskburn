@@ -10,7 +10,7 @@ fi
 function checkdeps {
     local deps_unmet=false
     for dep in badblocks smartctl zcav; do
-        if ! which $dep &> /dev/null; then
+        if ! hash $dep >/dev/null 2>&1; then
             echo "${dep} is not installed" >&2
             deps_unmet=true
         fi
