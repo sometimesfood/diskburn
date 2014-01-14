@@ -56,10 +56,13 @@ bbcheck() {
 }
 
 zcavcheck() {
+    local mode=$1
+    shift
+    [[ ${mode} = "rw" ]] && local opt="-w" || local opt=""
     for disk in $@; do
         local basename=$(basename ${disk})
-        log "Running zcav on ${disk}"
-        zcav -l ${basename}.zcav ${disk}
+        log "Running zcav on ${disk} (${mode} mode)"
+        zcav ${opt} -l ${basename}.${mode}.zcav ${disk}
     done
 }
 
@@ -77,9 +80,9 @@ set terminal png size 2560,960
 set output disk.".zcav.png"
 set multiplot layout 1,2 title disk
 set title "ro"
-plot disk.".zcav.ro" pt 1 ps 1
+plot disk.".ro.zcav" pt 1 ps 1
 set title "rw"
-plot disk.".zcav.rw" pt 1 ps 1
+plot disk.".rw.zcav" pt 1 ps 1
 unset multiplot
 EOF
     for disk in $@; do
@@ -100,8 +103,10 @@ bbcheck ro "$@"
 smartcheck 2 "$@"
 bbcheck rw "$@"
 smartcheck 3 "$@"
-zcavcheck "$@"
+zcavcheck ro "$@"
 smartcheck 4 "$@"
+zcavcheck rw "$@"
+smartcheck 5 "$@"
 draw_zcav "$@"
 log "Finished diskcheck"
 popd
