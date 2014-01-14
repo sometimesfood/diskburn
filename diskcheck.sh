@@ -1,5 +1,9 @@
 #!/bin/bash
 
+checkusage() {
+    [[ $# -eq 0 ]] && err_exit 'Usage: diskcheck.sh DEVICE...'
+}
+
 checkperms() {
     for disk in $@; do
         local f="diskcheck.sh: ${disk}"
@@ -7,10 +11,6 @@ checkperms() {
         [[ -b ${disk} ]] || err_exit "${f}: Not a block device"
         [[ -r ${disk} && -w ${disk} ]] || err_exit "${f}: Permission denied"
     done
-}
-
-checkusage() {
-    [[ $# -eq 0 ]] && err_exit 'Usage: diskcheck.sh DEVICE...'
 }
 
 checkdeps() {
