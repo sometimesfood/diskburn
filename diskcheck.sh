@@ -2,24 +2,15 @@
 
 checkperms() {
     for disk in $@; do
-        if ! [[ -e ${disk} ]]; then
-            err "diskcheck.sh: ${disk}: No such file or directory"
-            exit 1
-        elif ! [[ -b ${disk} ]]; then
-            err "diskcheck.sh: ${disk} is not a block device"
-            exit 1
-        elif ! [[ -r ${disk} && -w ${disk} ]]; then
-            err "diskcheck.sh: ${disk}: Permission denied"
-            exit 1
-        fi
+        local f="diskcheck.sh: ${disk}"
+        [[ -e ${disk} ]] || err_exit "${f}: No such file or directory"
+        [[ -b ${disk} ]] || err_exit "${f}: Not a block device"
+        [[ -r ${disk} && -w ${disk} ]] || err_exit "${f}: Permission denied"
     done
 }
 
 checkusage() {
-    if [[ $# -eq 0 ]]; then
-        err 'Usage: diskcheck.sh DEVICE...'
-        exit 1
-    fi
+    [[ $# -eq 0 ]] && err_exit 'Usage: diskcheck.sh DEVICE...'
 }
 
 checkdeps() {
@@ -30,15 +21,17 @@ checkdeps() {
             deps_unmet=true
         fi
     done
-    if $deps_unmet; then
-        err "\nUnmet dependencies, exiting..."
-        exit 1
-    fi
+    $deps_unmet && err_exit "\nUnmet dependencies, exiting..."
 }
 
 log() { echo -e "[$(date +%c)] $@"; }
 
 err() { echo -e "$@" >&2; }
+
+err_exit() {
+    err "$@"
+    exit 1
+}
 
 smartcheck() {
     local check_no=$1
@@ -96,8 +89,8 @@ EOF
 }
 
 checkusage "$@"
-checkdeps
 checkperms "$@"
+checkdeps
 
 BASEDIR="diskcheck-$(date +%FT%T)"; mkdir $BASEDIR
 pushd $BASEDIR
