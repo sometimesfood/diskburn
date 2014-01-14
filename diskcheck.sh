@@ -2,12 +2,12 @@
 
 set -e
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
     echo 'Usage: diskcheck.sh DEVICE...' >&2
     exit 1
 fi
 
-function checkdeps {
+checkdeps() {
     local deps_unmet=false
     for dep in badblocks smartctl zcav; do
         if ! hash $dep >/dev/null 2>&1; then
@@ -21,11 +21,11 @@ function checkdeps {
     fi
 }
 
-function log {
+log() {
     echo "[$(date +%c)] $@"
 }
 
-function smartcheck {
+smartcheck() {
     local check_no=$1
     shift
     set +e
@@ -34,14 +34,14 @@ function smartcheck {
         log "Running SMART check #${check_no} on ${disk}"
         smartctl -d sat --all $disk > ${basename}.smart.${check_no}
         smartstat=$?
-        if [ $(($smartstat & 191)) -ne 0 ]; then
+        if [[ $(($smartstat & 191)) -ne 0 ]]; then
             exit $smartstat
         fi
     done
     set -e
 }
 
-function bbcheck {
+bbcheck() {
     local mode=$1
     shift
     test $mode = "rw" && local opt="-w" || local opt=""
@@ -53,7 +53,7 @@ function bbcheck {
     wait
 }
 
-function zcavcheck {
+zcavcheck() {
     for disk in $@; do
         local basename=$(basename $disk)
         log "Running zcav on ${disk}"
@@ -61,7 +61,7 @@ function zcavcheck {
     done
 }
 
-function draw_zcav {
+draw_zcav() {
     cat <<EOF > gnuplot.gp
 unset autoscale x
 set autoscale xmax
