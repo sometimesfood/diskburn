@@ -2,28 +2,30 @@
 
 set -e
 
-if [[ $# -eq 0 ]]; then
-    echo 'Usage: diskcheck.sh DEVICE...' >&2
-    exit 1
-fi
+checkusage() {
+    if [[ $# -eq 0 ]]; then
+        err 'Usage: diskcheck.sh DEVICE...'
+        exit 1
+    fi
+}
 
 checkdeps() {
     local deps_unmet=false
     for dep in badblocks smartctl zcav; do
         if ! hash $dep >/dev/null 2>&1; then
-            echo "${dep} is not installed" >&2
+            err "${dep} is not installed"
             deps_unmet=true
         fi
     done
     if $deps_unmet; then
-        echo -e "\nUnmet dependencies, exiting..." >&2
+        err "\nUnmet dependencies, exiting..."
         exit 1
     fi
 }
 
-log() {
-    echo "[$(date +%c)] $@"
-}
+log() { echo -e "[$(date +%c)] $@"; }
+
+err() { echo -e "$@" >&2; }
 
 smartcheck() {
     local check_no=$1
@@ -86,6 +88,7 @@ EOF
     done
 }
 
+checkusage "$@"
 checkdeps
 
 BASEDIR="diskcheck-$(date +%FT%T)"; mkdir $BASEDIR
