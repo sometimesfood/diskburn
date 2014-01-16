@@ -88,20 +88,26 @@ EOF
     done
 }
 
-checkusage "$@"
-checkperms "$@"
-checkdeps
+main() {
+    checkusage "$@"
+    checkperms "$@"
+    checkdeps
 
-BASEDIR="diskcheck-$(date +%FT%T)"; mkdir ${BASEDIR}
-pushd ${BASEDIR}
-log "Starting diskcheck on $@"
-smartcheck 1 "$@"
-bbcheck "$@"
-smartcheck 2 "$@"
-zcavcheck ro "$@"
-smartcheck 3 "$@"
-zcavcheck rw "$@"
-smartcheck 4 "$@"
-draw_zcav "$@"
-log "Finished diskcheck"
-popd
+    local basedir="diskcheck-$(date +%FT%T)"
+    mkdir ${basedir}
+    pushd ${basedir}
+
+    log "Starting diskcheck on $@"
+    smartcheck 1 "$@"
+    bbcheck "$@"
+    smartcheck 2 "$@"
+    zcavcheck ro "$@"
+    smartcheck 3 "$@"
+    zcavcheck rw "$@"
+    smartcheck 4 "$@"
+    draw_zcav "$@"
+    log "Finished diskcheck"
+    popd
+}
+
+main "$@"
