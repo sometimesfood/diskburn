@@ -99,9 +99,9 @@ main() {
 
     for disk in $@; do
         smartcheck 2 "${disk}"
-        zcavcheck read "${disk}"
+        zcavcheck 'read' "${disk}"
         smartcheck 3 "${disk}"
-        zcavcheck write "${disk}"
+        zcavcheck 'write' "${disk}"
         smartcheck 4 "${disk}"
         draw_zcav "${disk}"
     done
