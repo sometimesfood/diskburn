@@ -44,13 +44,10 @@ smartcheck() {
 }
 
 bbcheck() {
-    local mode=$1
-    shift
-    [[ ${mode} = "rw" ]] && local opt="-w" || local opt=""
     for disk in $@; do
         local basename=$(basename ${disk})
-        log "Checking ${disk} for bad blocks (${mode} mode)"
-        badblocks ${opt} -o ${basename}.bb.${mode} ${disk}&
+        log "Checking ${disk} for bad blocks"
+        badblocks -w -o ${basename}.bb ${disk} &
     done
     wait
 }
@@ -99,14 +96,12 @@ BASEDIR="diskcheck-$(date +%FT%T)"; mkdir ${BASEDIR}
 pushd ${BASEDIR}
 log "Starting diskcheck on $@"
 smartcheck 1 "$@"
-bbcheck ro "$@"
+bbcheck "$@"
 smartcheck 2 "$@"
-bbcheck rw "$@"
-smartcheck 3 "$@"
 zcavcheck ro "$@"
-smartcheck 4 "$@"
+smartcheck 3 "$@"
 zcavcheck rw "$@"
-smartcheck 5 "$@"
+smartcheck 4 "$@"
 draw_zcav "$@"
 log "Finished diskcheck"
 popd
