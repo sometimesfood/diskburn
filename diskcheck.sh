@@ -45,7 +45,7 @@ bbcheck() {
     local disk="$1"
     local basename="$(basename ${disk})"
     log "Checking ${disk} for bad blocks..."
-    badblocks -w -o ${basename}.bb ${disk} &
+    badblocks -sw -o ${basename}.bb ${disk} 2> ${basename}.bb.progress &
 }
 
 zcavcheck() {
