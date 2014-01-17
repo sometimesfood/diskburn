@@ -64,11 +64,11 @@ draw_zcav() {
     cat <<EOF > ${plotfile}
 #!/usr/bin/env gnuplot
 unset autoscale x
-set autoscale xmax
-set autoscale xmin
 unset autoscale y
-set autoscale ymax
+set autoscale xmin
+set autoscale xmax
 set autoscale ymin
+set autoscale ymax
 set xlabel "position (MB)"
 set ylabel "transfer rate (MB/s)"
 set terminal png size 2560,960
