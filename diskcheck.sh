@@ -97,6 +97,7 @@ main() {
 
     for disk in $@; do
         smartcheck 1 "${disk}"
+        smartctl -d sat --test=short "${disk}"
         bbcheck "${disk}"
     done
     wait
