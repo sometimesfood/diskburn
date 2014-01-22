@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CHECK_RETURN=96 #Bit 5,6
+BAD_RETURN=158  #Bit 1,2,3,4,7
+
 checkusage() {
     [[ $# -eq 0 ]] && err_exit 'Usage: diskcheck.sh DEVICE...'
 }
@@ -39,6 +42,12 @@ smartcheck() {
     local basename="$(basename ${disk})"
     log "Running SMART check #${check_no} on ${disk}"
     smartctl -d sat --all ${disk} > ${basename}.smart.${check_no}
+    ret=$?
+    if [ $(($ret & $BAD_RETURN)) -ne 0 ]; then
+        bad_drives="$bad_drives $disk"
+    elif [ $(($ret & $CHECK_RETURN)) -ne 0 ]; then
+        check_drives="$check_drives $disk"
+    fi
 }
 
 bbcheck() {
@@ -85,6 +94,21 @@ EOF
     hash gnuplot >/dev/null 2>&1 && gnuplot "${plotfile}"
 }
 
+uniq_values () {
+    printf "%q\n" "$@" | sort -u
+}
+
+flatten () {
+    echo "$@" | tr '\n' ' '
+}
+
+report_smart() {
+    bad_drives="$(uniq_values $bad_drives)"
+    check_drives="$(uniq_values $check_drives | grep -v -f <(echo "$bad_drives") )"
+    log "CHECK: \E[33m$(flatten $check_drives)\E[0m"
+    log "BAD: \E[31m$(flatten $bad_drives)\E[0m"
+}
+
 main() {
     checkusage "$@"
     checkperms "$@"
@@ -112,6 +136,7 @@ main() {
     done
 
     log "Finished diskcheck on $@"
+    report_smart
     popd
 }
 
