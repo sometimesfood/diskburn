@@ -86,8 +86,8 @@ EOF
 }
 
 report_bad_disks() {
-    local bad_mask=96 # bits 5,6
-    local fishy_mask=158 # bits 1,2,3,4,7
+    local bad_mask=158 # bits 1,2,3,4,7
+    local fishy_mask=96 # bits 5,6
     local bad=''
     local fishy=''
     for disk in $@; do
