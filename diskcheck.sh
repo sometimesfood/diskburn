@@ -86,18 +86,18 @@ EOF
 }
 
 report_bad_disks() {
-    local bad_mask=158 # bits 1,2,3,4,7
-    local fishy_mask=96 # bits 5,6
-    local bad=''
+    local fishy_mask=$((2**5 + 2**6)) # bits 5,6 (see smartctl(8) manpage)
+    local bad_mask=$((2**1 + 2**2 + 2**3 + 2**4 + 2**7)) # bits 1,2,3,4,7
     local fishy=''
+    local bad=''
     for disk in $@; do
         smartctl -d sat --all ${disk} > /dev/null
         ret=$?
-        [[ $(($ret & ${bad_mask})) -ne 0 ]] && bad="${bad} ${disk}"
         [[ $(($ret & ${fishy_mask})) -ne 0 ]] && fishy="${fishy} ${disk}"
+        [[ $(($ret & ${bad_mask})) -ne 0 ]] && bad="${bad} ${disk}"
     done
-    [[ "${bad}" ]] && log "Bad disks: ${bad}"
     [[ "${fishy}" ]] && log "Fishy disks: ${fishy}"
+    [[ "${bad}" ]] && log "Bad disks: ${bad}"
 }
 
 main() {
