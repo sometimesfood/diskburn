@@ -54,7 +54,7 @@ zcavcheck() {
     local basename="$(basename ${disk})"
     [[ ${mode} = "write" ]] && local opt="-w" || local opt=""
     log "Running zcav on ${disk} (${mode} mode)"
-    zcav ${opt} -l ${basename}.${mode}.zcav ${disk}
+    zcav ${opt} -l ${basename}.${mode}.zcav ${disk} >/dev/null 2>&1
 }
 
 draw_zcav() {
@@ -112,7 +112,7 @@ main() {
 
     for disk in $@; do
         smartcheck 1 "${disk}"
-        smartctl -d sat --test=short "${disk}"
+        smartctl -q silent -d sat --test=short "${disk}"
         bbcheck "${disk}"
     done
     wait
