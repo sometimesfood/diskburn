@@ -1,12 +1,12 @@
 #!/bin/bash
 
 checkusage() {
-    [[ $# -eq 0 ]] && err_exit 'Usage: diskcheck.sh DEVICE...'
+    [[ $# -eq 0 ]] && err_exit 'Usage: diskburn DEVICE...'
 }
 
 checkperms() {
     for disk in $@; do
-        local f="diskcheck.sh: ${disk}"
+        local f="diskburn: ${disk}"
         [[ -e ${disk} ]] || err_exit "${f}: No such file or directory"
         [[ -b ${disk} ]] || err_exit "${f}: Not a block device"
         [[ -r ${disk} && -w ${disk} ]] || err_exit "${f}: Permission denied"
@@ -105,10 +105,10 @@ main() {
     checkperms "$@"
     checkdeps
 
-    local basedir="diskcheck-$(date +%FT%T)"
+    local basedir="diskburn-$(date +%FT%T)"
     mkdir ${basedir}
     pushd ${basedir}
-    log "Starting diskcheck on $@"
+    log "Starting diskburn on $@"
 
     for disk in $@; do
         smartcheck 1 "${disk}"
@@ -126,7 +126,7 @@ main() {
         draw_zcav "${disk}"
     done
 
-    log "Finished diskcheck on $@"
+    log "Finished diskburn on $@"
     report_bad_disks "$@"
     popd
 }
