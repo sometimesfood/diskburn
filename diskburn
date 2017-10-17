@@ -38,7 +38,7 @@ smartcheck() {
     local disk="$2"
     local basename="$(basename ${disk})"
     log "Running SMART check #${check_no} on ${disk}"
-    smartctl -d sat --all ${disk} > ${basename}.smart.${check_no}
+    smartctl --all ${disk} > ${basename}.smart.${check_no}
 }
 
 bbcheck() {
@@ -91,7 +91,7 @@ report_bad_disks() {
     local fishy=''
     local bad=''
     for disk in $@; do
-        smartctl -d sat --all ${disk} > /dev/null
+        smartctl --all ${disk} > /dev/null
         ret=$?
         [[ $(($ret & ${fishy_mask})) -ne 0 ]] && fishy="${fishy} ${disk}"
         [[ $(($ret & ${bad_mask})) -ne 0 ]] && bad="${bad} ${disk}"
@@ -112,7 +112,7 @@ main() {
 
     for disk in $@; do
         smartcheck 1 "${disk}"
-        smartctl -q silent -d sat --test=short "${disk}"
+        smartctl -q silent --test=short "${disk}"
         bbcheck "${disk}"
     done
     wait
