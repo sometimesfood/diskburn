@@ -5,7 +5,7 @@ checkusage() {
 }
 
 checkperms() {
-    for disk in $@; do
+    for disk in "$@"; do
         local f="diskburn: ${disk}"
         [[ -e ${disk} ]] || err_exit "${f}: No such file or directory"
         [[ -b ${disk} ]] || err_exit "${f}: Not a block device"
@@ -24,7 +24,7 @@ checkdeps() {
     ${deps_unmet} && err_exit "\nUnmet dependencies, exiting..."
 }
 
-log() { echo -e "[$(date +%c)] $@"; }
+log() { echo -e "[$(date +%c)] $*"; }
 
 err() { echo -e "$@" >&2; }
 
@@ -35,38 +35,38 @@ err_exit() {
 
 sectorsize() {
     local disk="$1"
-    (lsblk -nro PHY-SeC ${disk} 2>/dev/null || echo 4096) | head -n 1
+    (lsblk -nro PHY-SeC "${disk}" 2>/dev/null || echo 4096) | head -n 1
 }
 
 smartcheck() {
     local check_no="$1"
     local disk="$2"
-    local basename="$(basename ${disk})"
+    local basename="$(basename "${disk}")"
     log "Running SMART check #${check_no} on ${disk}"
-    smartctl --all ${disk} > ${basename}.smart.${check_no}
+    smartctl --all "${disk}" > "${basename}.smart.${check_no}"
 }
 
 bbcheck() {
     local disk="$1"
-    local basename="$(basename ${disk})"
-    local ssize="$(sectorsize ${disk})"
+    local basename="$(basename "${disk}")"
+    local ssize="$(sectorsize "${disk}")"
     log "Checking ${disk} for bad blocks..."
-    badblocks -sw -b ${ssize} -o ${basename}.bb ${disk} \
-              2> ${basename}.bb.progress &
+    badblocks -sw -b "${ssize}" -o "${basename}.bb" "${disk}" \
+              2> "${basename}.bb.progress" &
 }
 
 zcavcheck() {
     local mode="$1"
     local disk="$2"
-    local basename="$(basename ${disk})"
-    [[ ${mode} = "write" ]] && local opt="-w" || local opt=""
+    local basename="$(basename "${disk}")"
+    if [[ ${mode} = "write" ]]; then local opt="-w"; else local opt=""; fi
     log "Running zcav on ${disk} (${mode} mode)"
-    zcav ${opt} -l ${basename}.${mode}.zcav ${disk} >/dev/null 2>&1
+    zcav ${opt} -l "${basename}.${mode}.zcav" "${disk}" >/dev/null 2>&1
 }
 
 draw_zcav() {
     local disk="$1"
-    local basename="$(basename ${disk})"
+    local basename="$(basename "${disk}")"
     local plotfile="${basename}.gp"
     cat <<EOF > ${plotfile}
 #!/usr/bin/env gnuplot
@@ -97,11 +97,11 @@ report_bad_disks() {
     local bad_mask=$((2**1 + 2**2 + 2**3 + 2**4 + 2**7)) # bits 1,2,3,4,7
     local fishy=''
     local bad=''
-    for disk in $@; do
-        smartctl --all ${disk} > /dev/null
+    for disk in "$@"; do
+        smartctl --all "${disk}" > /dev/null
         ret=$?
-        [[ $(($ret & ${fishy_mask})) -ne 0 ]] && fishy="${fishy} ${disk}"
-        [[ $(($ret & ${bad_mask})) -ne 0 ]] && bad="${bad} ${disk}"
+        [[ $((ret & fishy_mask)) -ne 0 ]] && fishy="${fishy} ${disk}"
+        [[ $((ret & bad_mask)) -ne 0 ]] && bad="${bad} ${disk}"
     done
     [[ "${fishy}" ]] && log "Fishy disks: ${fishy}"
     [[ "${bad}" ]] && log "Bad disks: ${bad}"
@@ -113,18 +113,18 @@ main() {
     checkdeps
 
     local basedir="diskburn-$(date +%FT%T)"
-    mkdir ${basedir}
-    pushd ${basedir}
-    log "Starting diskburn on $@"
+    mkdir "${basedir}"
+    pushd "${basedir}"
+    log "Starting diskburn on $*"
 
-    for disk in $@; do
+    for disk in "$@"; do
         smartcheck 1 "${disk}"
         smartctl -q silent --test=short "${disk}"
         bbcheck "${disk}"
     done
     wait
 
-    for disk in $@; do
+    for disk in "$@"; do
         smartcheck 2 "${disk}"
         zcavcheck 'read' "${disk}"
         smartcheck 3 "${disk}"
@@ -133,7 +133,7 @@ main() {
         draw_zcav "${disk}"
     done
 
-    log "Finished diskburn on $@"
+    log "Finished diskburn on $*"
     report_bad_disks "$@"
     popd
 }
