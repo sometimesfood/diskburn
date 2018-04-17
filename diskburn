@@ -41,15 +41,18 @@ sectorsize() {
 smartcheck() {
     local check_no="$1"
     local disk="$2"
-    local basename="$(basename "${disk}")"
+    local basename
+    basename="$(basename "${disk}")"
     log "Running SMART check #${check_no} on ${disk}"
     smartctl --all "${disk}" > "${basename}.smart.${check_no}"
 }
 
 bbcheck() {
     local disk="$1"
-    local basename="$(basename "${disk}")"
-    local ssize="$(sectorsize "${disk}")"
+    local basename
+    local ssize
+    basename="$(basename "${disk}")"
+    ssize="$(sectorsize "${disk}")"
     log "Checking ${disk} for bad blocks..."
     badblocks -sw -b "${ssize}" -o "${basename}.bb" "${disk}" \
               2> "${basename}.bb.progress" &
@@ -58,7 +61,8 @@ bbcheck() {
 zcavcheck() {
     local mode="$1"
     local disk="$2"
-    local basename="$(basename "${disk}")"
+    local basename
+    basename="$(basename "${disk}")"
     if [[ ${mode} = "write" ]]; then local opt="-w"; else local opt=""; fi
     log "Running zcav on ${disk} (${mode} mode)"
     zcav ${opt} -l "${basename}.${mode}.zcav" "${disk}" >/dev/null 2>&1
@@ -66,7 +70,8 @@ zcavcheck() {
 
 draw_zcav() {
     local disk="$1"
-    local basename="$(basename "${disk}")"
+    local basename
+    basename="$(basename "${disk}")"
     local plotfile="${basename}.gp"
     cat <<EOF > ${plotfile}
 #!/usr/bin/env gnuplot
@@ -112,7 +117,8 @@ main() {
     checkperms "$@"
     checkdeps
 
-    local basedir="diskburn-$(date +%FT%T)"
+    local basedir
+    basedir="diskburn-$(date +%FT%T)"
     mkdir "${basedir}"
     pushd "${basedir}"
     log "Starting diskburn on $*"
