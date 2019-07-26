@@ -33,11 +33,6 @@ err_exit() {
     exit 1
 }
 
-sectorsize() {
-    local disk="$1"
-    (lsblk -nro PHY-SeC "${disk}" 2>/dev/null || echo 4096) | head -n 1
-}
-
 smartcheck() {
     local check_no="$1"
     local disk="$2"
@@ -50,11 +45,9 @@ smartcheck() {
 bbcheck() {
     local disk="$1"
     local basename
-    local ssize
     basename="$(basename "${disk}")"
-    ssize="$(sectorsize "${disk}")"
     log "Checking ${disk} for bad blocks..."
-    badblocks -sw -b "${ssize}" -o "${basename}.bb" "${disk}" \
+    badblocks -sw -b 4096 -o "${basename}.bb" "${disk}" \
               2> "${basename}.bb.progress" &
 }
 
