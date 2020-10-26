@@ -56,9 +56,9 @@ zcavcheck() {
     local disk="$2"
     local basename
     basename="$(basename "${disk}")"
-    if [[ ${mode} = "write" ]]; then local opt="-w"; else local opt=""; fi
+    if [[ ${mode} = "write" ]]; then local opts=(-w); else local opts=(); fi
     log "Running zcav on ${disk} (${mode} mode)"
-    zcav ${opt} -l "${basename}.${mode}.zcav" "${disk}" >/dev/null 2>&1
+    zcav "${opts[@]}" -l "${basename}.${mode}.zcav" "${disk}" >/dev/null 2>&1
 }
 
 draw_zcav() {
