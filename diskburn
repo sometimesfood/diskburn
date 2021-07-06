@@ -73,11 +73,11 @@ set autoscale xmax
 set autoscale ymin
 set autoscale ymax
 set xlabel "position (MB)"
-set ylabel "transfer rate (MB/s)"
+set ylabel "read rate (MB/s)"
 set terminal png noenhanced size 1280,960
 set output "${basename}.zcav.png"
 set nokey
-set title "zcav reads ${basename}"
+set title "${basename}"
 plot "${basename}.zcav" pt 1 ps 1 with lines
 EOF
     chmod +x "${plotfile}"
